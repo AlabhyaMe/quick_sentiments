@@ -1,5 +1,6 @@
 README.md
 pyproject.toml
+setup.py
 quick_sentiments/__init__.py
 quick_sentiments/pipeline.py
 quick_sentiments/predict.py

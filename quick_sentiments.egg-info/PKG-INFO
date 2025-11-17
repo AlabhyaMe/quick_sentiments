@@ -1,7 +1,8 @@
 Metadata-Version: 2.4
 Name: quick-sentiments
-Version: 0.2.5
+Version: 0.2.6
 Summary: Sentiment Analysis pipeline
+Author: Alabhya Dahal
 Author-email: Alabhya Dahal <alabhya.dahal@gmail.com>
 License: MIT License
 Project-URL: Homepage, https://github.com/AlabhyaMe/Sentiments-Analysis
@@ -32,6 +33,7 @@ Requires-Dist: pytest>=6.0; extra == "dev"
 Requires-Dist: black>=22.0; extra == "dev"
 Requires-Dist: twine; extra == "dev"
 Requires-Dist: build; extra == "dev"
+Dynamic: author
 
 #  Quick Sentiments
 
