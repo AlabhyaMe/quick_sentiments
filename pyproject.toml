@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quick-sentiments"
-version = "0.2.5" # major update
+version = "0.2.5" # minor updates
 authors = [
   { name="Alabhya Dahal", email="alabhya.dahal@gmail.com" },
 ]
