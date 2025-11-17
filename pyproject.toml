@@ -5,23 +5,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quick-sentiments"
-version = "0.2.4" # major update
+version = "0.2.5" # major update
 authors = [
   { name="Alabhya Dahal", email="alabhya.dahal@gmail.com" },
 ]
 description = "Sentiment Analysis pipeline"
 readme = "README.md" # <--- Ensure this points to your README.md
 license = { text = "MIT License" }
-urls = { "Homepage" = "https://github.com/AlabhyaMe/Sentiments-Analysis.git" }
+urls = { "Homepage" = "https://github.com/AlabhyaMe/Sentiments-Analysis" }
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic"
 ]
 requires-python = ">=3.8"
 dependencies = [
