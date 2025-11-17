@@ -1,18 +1,22 @@
 Metadata-Version: 2.4
 Name: quick-sentiments
-Version: 0.2.4
+Version: 0.2.5
 Summary: Sentiment Analysis pipeline
 Author-email: Alabhya Dahal <alabhya.dahal@gmail.com>
 License: MIT License
-Project-URL: Homepage, https://github.com/AlabhyaMe/Sentiments-Analysis.git
-Classifier: Programming Language :: Python :: 3
+Project-URL: Homepage, https://github.com/AlabhyaMe/Sentiments-Analysis
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
 Classifier: Programming Language :: Python :: 3.10
-Classifier: Programming Language :: Python :: 3.11
-Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Text Processing :: Linguistic
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 Requires-Dist: numpy<2.0.0,>=1.23.0
@@ -45,7 +49,7 @@ git clone https://github.com/AlabhyaMe/quick_sentiments.git
 Then run the command in the command prompt or notebook where git is cloned. Make sure you are in the main directory - quick_sentiments
 
 ```
-pip install .\dist\quick_sentiments-0.2.0-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
+pip install .\dist\quick_sentiments-0.2.4-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
 ```
 
 This Python package is designed to streamline natural language processing (NLP) for sentiment analysis. It achieves this by combining various vectorization techniques with machine learning models. The package automates the often complex and time-consuming vectorization process, allowing users to skip the manual coding typically required for this step. Additionally, users can easily select their preferred machine learning models to conduct sentiment analysis.
