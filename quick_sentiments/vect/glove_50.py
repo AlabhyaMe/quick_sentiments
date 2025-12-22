@@ -39,7 +39,7 @@ def vectorize_train(texts):
     # because it contains the vocabulary and embeddings needed to transform new data consistently.
     return X_features, _loaded_word2vec_model_instance, None # since we are using array, order is necessary, thus we need to return the model instance as well
 
-def vectorize_test(texts, loaded_model):
+def vectorize_test(texts, loaded_model, norm=None):
     print("Transforming test data using loaded Word2Vec model...")
     tokenized = [sentence.split() for sentence in texts]
     X_features = np.array([sentence_vector(tokens, loaded_model) for tokens in tokenized])

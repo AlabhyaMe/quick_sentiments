@@ -27,7 +27,7 @@ def vectorize_train(texts):
     # new, unseen data into the same feature space.
     return X_features, vectorizer_train, None
 
-def vectorize_test(texts, fitted_vectorizer):
+def vectorize_test(texts, fitted_vectorizer,norm=None):
     """
     Transform test data using fitted Bag-of-Words vectorizer.
     """
