@@ -25,7 +25,7 @@ def vectorize_train(texts):
     # because it is 'fitted' on the training data and contains the learned
     # vocabulary. This fitted object is essential to consistently transform
     # new, unseen data into the same feature space.
-    return X_features, vectorizer_train
+    return X_features, vectorizer_train, None
 
 def vectorize_test(texts, fitted_vectorizer):
     """

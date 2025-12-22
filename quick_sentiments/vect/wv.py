@@ -39,7 +39,7 @@ def vectorize_train(texts):
 
     # For Word2Vec, the loaded model instance itself serves as the "fitted vectorizer object"
     # because it contains the vocabulary and embeddings needed to transform new data consistently.
-    return X_features, _loaded_word2vec_model_instance # since we are using array, order is necessary, thus we need to return the model instance as well
+    return X_features, _loaded_word2vec_model_instance, None # since we are using array, order is necessary, thus we need to return the model instance as well
 
 
 def vectorize_test(texts, loaded_model):

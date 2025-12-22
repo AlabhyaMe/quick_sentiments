@@ -103,8 +103,8 @@ def run_pipeline(
 
     # Vectorize the dataset (X)
     print("2. Vectorizing  dataset (X)...")
-    X_train_vectorized, fitted_vectorizer_object = vectorize_train(X_train)
-    X_test_vectorized = vectorize_test(X_test, fitted_vectorizer_object)
+    X_train_vectorized, fitted_vectorizer_object,norm = vectorize_train(X_train)
+    X_test_vectorized = vectorize_test(X_test, fitted_vectorizer_object,norm)
 
     # Train + predict
     print("3. Training and predicting...")
