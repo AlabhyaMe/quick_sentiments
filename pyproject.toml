@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quick-sentiments"
-version = "0.2.8" # major updates
+version = "0.2.9" # naive bayesian
 authors = [
   { name="Alabhya Dahal", email="alabhya.dahal@gmail.com" },
 ]
