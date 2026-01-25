@@ -14,7 +14,7 @@ git clone https://github.com/AlabhyaMe/quick_sentiments.git
 Then run the command in the command prompt or notebook where git is cloned. Make sure you are in the main directory - quick_sentiments
 
 ```
-pip install .\dist\quick_sentiments-0.2.7-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
+pip install .\dist\quick_sentiments-0.2.9-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
 ```
 
 This Python package is designed to streamline natural language processing (NLP) for sentiment analysis. It achieves this by combining various vectorization techniques with machine learning models. The package automates the often complex and time-consuming vectorization process, allowing users to skip the manual coding typically required for this step. Additionally, users can easily select their preferred machine learning models to conduct sentiment analysis.
