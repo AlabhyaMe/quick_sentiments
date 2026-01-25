@@ -15,6 +15,7 @@ quick_sentiments.egg-info/top_level.txt
 quick_sentiments/ml_algo/XGB.py
 quick_sentiments/ml_algo/__init__.py
 quick_sentiments/ml_algo/logit.py
+quick_sentiments/ml_algo/nb.py
 quick_sentiments/ml_algo/nn.py
 quick_sentiments/ml_algo/rf.py
 quick_sentiments/vect/BOW.py
