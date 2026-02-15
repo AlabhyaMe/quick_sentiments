@@ -19,24 +19,52 @@ def run_pipeline(
     perform_tuning: bool = False
 ):
     """
-    Runs the full pipeline:
-      - vectorize
-      - train model
-      - evaluate
+    Orchestrates the full sentiment analysis pipeline: Vectorization -> Training -> Evaluation.
+
+    This function automatically handles data splitting, vectorization (converting text to numbers),
+    training the selected machine learning model, and evaluating its performance.
 
     Args:
-        vectorizer_name (str): Name of the vectorizer (e.g., 'tfidf', 'word_embedding').
-        model_name (str): Name of the ML model (e.g., 'logistic_regression', 'random_forest').
-        df (pl.DataFrame): Your Polars DataFrame containing the text and sentiment columns.
-        text_column_name (str): The name of the column in `df` that contains the processed text.
-        sentiment_column_name (str): The name of the column in `df` that contains the sentiment labels.
+        vectorizer_name (str): 
+            The method to convert text to numbers. Options:
+            - 'tfidf' (Recommended for most cases)
+            - 'bow' (Bag of Words - simple counts)
+            - 'glove' (Word Embeddings - captures meaning)
+        model_name (str): 
+            The machine learning algorithm to use. Options:
+            - 'rf' (Random Forest - robust)
+            - 'logit' (Logistic Regression - fast baseline)
+            - 'xgb' (XGBoost - high performance)
+            - 'nb' (Naive Bayes - good for text)
+        df (Union[pl.DataFrame, pd.DataFrame]): 
+            The input DataFrame containing your data.
+        text_column_name (str): 
+            The name of the column containing the *cleaned* text.
+        sentiment_column_name (str): 
+            The name of the column containing the target labels (e.g., 'positive', 'negative').
+        perform_tuning (bool, optional): 
+            If True, performs Hyperparameter Tuning (GridSearch) to find the best model settings. 
+            Warning: This can take a long time! Defaults to False.
 
     Returns:
-        dict: A dictionary containing the trained model, fitted vectorizer, label encoder, and evaluation results.
+        dict: A dictionary containing:
+            - 'model_object': The trained model.
+            - 'vectorizer_object': The fitted vectorizer.
+            - 'accuracy': The accuracy score (float).
+            - 'report': A detailed classification report.
+
+    Example:
+        >>> results = run_pipeline(
+        ...     vectorizer_name="tfidf",
+        ...     model_name="rf",
+        ...     df=my_data,
+        ...     text_column_name="clean_text",
+        ...     sentiment_column_name="label"
+        ... )
+        >>> print(results['accuracy'])
+        0.85
     """
     # --- NEW: Mapping for Short and Long Names ---
-   
-
     VEC_MAP = {
         "bow": "BOW",
         "bag_of_words": "BOW",

@@ -64,11 +64,58 @@ def pre_process(
     lemmatize: bool = False
 ) -> pl.DataFrame:
     """
-    Hybrid Preprocessing: 
-    - Uses fast Polars expressions for string cleaning.
-    - Uses Python fallback only for linguistic tasks (Stopwords/Lemmatization).
+    Cleans and preprocesses text data using fast Polars expressions.
+
+    This function handles both Polars and pandas DataFrames. It prioritizes 
+    speed by using native Rust-based string operations for cleaning (regex, 
+    lowercase) and only falls back to Python for complex linguistic tasks.
+
+    Args:
+        df (Union[pl.DataFrame, pd.DataFrame]): 
+            The input DataFrame containing the text to clean.
+        text_column (str): 
+            The name of the column containing the raw text.
+        new_column_name (str, optional): 
+            The name for the output column. Defaults to "processed_text".
+        to_lowercase (bool, optional): 
+            Convert text to lowercase. Defaults to True.
+        remove_brackets (bool, optional): 
+            Remove content inside square brackets []. Defaults to True.
+        remove_urls (bool, optional): 
+            Remove URLs starting with http/www. Defaults to True.
+        remove_html (bool, optional): 
+            Remove HTML tags (<br>, <div>). Defaults to True.
+        remove_digits (bool, optional): 
+            Remove all numeric digits. Defaults to True.
+        remove_punct (bool, optional): 
+            Remove punctuation marks. Defaults to True.
+        remove_stop_words (bool, optional): 
+            Remove common English stop words (slower). Defaults to False.
+        lemmatize (bool, optional): 
+            Convert words to their root form (slower). Defaults to False.
+
+    Returns:
+        pl.DataFrame: A Polars DataFrame with the new cleaned column.
+
+    Example:
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({"text": ["I LOVE this!!! <br>", "Click http://site.com"]})
+        >>> clean_df = pre_process(df, "text", remove_urls=True)
+        >>> print(clean_df)
+        shape: (2, 2)
+        ┌───────────────────────┬────────────────┐
+        │ text                  ┆ processed_text │
+        │ ---                   ┆ ---            │
+        │ str                   ┆ str            │
+        ╞═══════════════════════╪════════════════╡
+        │ I LOVE this!!! <br>   ┆ i love this    │
+        │ Click http://site.com ┆ click          │
+        └───────────────────────┴────────────────┘
+
     """
     
+    if isinstance(df, pd.DataFrame):
+        df = pl.from_pandas(df)
     # 1. Start with Polars Expression (Handle Nulls safely)
     expr = pl.col(text_column).cast(pl.Utf8).fill_null("")
 

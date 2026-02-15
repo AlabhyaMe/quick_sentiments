@@ -11,18 +11,46 @@ def make_predictions(
         label_encoder,
         prediction_column_name: str = "predictions") -> pl.DataFrame:
     """
-    Makes predictions and adds them as a new column with original labels.
-    
+Generates predictions for new data using a trained model and vectorizer.
+
+    This function handles the complexities of different vectorizers (Scikit-Learn vs. Gensim)
+    and data formats (Pandas vs. Polars) automatically. It filters out missing data, 
+    vectorizes the text, predicts using the model, and decodes the labels back to 
+    their original string format (e.g., 'positive', 'negative').
+
     Args:
-        new_data: Input DataFrame (Polars or pandas)
-        text_column_name: Name of column containing text to predict on
-        vectorizer: Fitted vectorizer (TF-IDF/BOW) or word embeddings model
-        best_model: Trained model (must have classes_ attribute)
-        label_encoder: Fitted LabelEncoder for inverse transform
-        prediction_column_name: Name for new prediction column
-        
+        new_data (Union[pl.DataFrame, pd.DataFrame]): 
+            The input DataFrame containing the text to predict on.
+        text_column_name (str): 
+            The name of the column in `new_data` that contains the *preprocessed* text.
+        vectorizer (Any): 
+            The fitted vectorizer object. 
+            - For BOW/TF-IDF: A Scikit-Learn vectorizer (must have `.transform()`).
+            - For Word2Vec/GloVe: A Gensim KeyedVectors object.
+        best_model (Any): 
+            The trained machine learning model (e.g., RandomForest, XGBoost).
+        label_encoder (Any): 
+            The fitted LabelEncoder used during training to decode predictions 
+            back to strings.
+        prediction_column_name (str, optional): 
+            The name for the new column containing predictions. Defaults to "predictions".
+
     Returns:
-        Polars DataFrame with label predictions added
+        pl.DataFrame: 
+            The original DataFrame (converted to Polars) with the new prediction column added.
+            Rows with missing text (None/NaN) in the target column will be dropped.
+
+    Example:
+        >>> # Assuming you have trained_results from run_pipeline()
+        >>> preds = make_predictions(
+        ...     new_data=df_new,
+        ...     text_column_name="clean_text",
+        ...     vectorizer=trained_results["vectorizer_object"],
+        ...     best_model=trained_results["model_object"],
+        ...     label_encoder=trained_results["label_encoder"]
+        ... )
+        >>> print(preds.select(["clean_text", "predictions"]))
+        
     """
     # Convert pandas to Polars if needed
     if isinstance(new_data, pd.DataFrame):
