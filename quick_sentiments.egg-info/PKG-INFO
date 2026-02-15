@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: quick-sentiments
-Version: 0.3.0
+Version: 0.3.3
 Summary: Sentiment Analysis pipeline
 Author: Alabhya Dahal
 Author-email: Alabhya Dahal <alabhya.dahal@gmail.com>
@@ -18,16 +18,16 @@ Classifier: Programming Language :: Python :: 3.10
 Classifier: Topic :: Scientific/Engineering
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: Topic :: Text Processing :: Linguistic
-Requires-Python: >=3.8
+Requires-Python: <3.13,>=3.10
 Description-Content-Type: text/markdown
-Requires-Dist: numpy<2.0.0,>=1.23.0
-Requires-Dist: pandas>=1.3.0
-Requires-Dist: scikit-learn>=1.0.0
-Requires-Dist: polars<0.20.0,>=0.19.5
-Requires-Dist: gensim>4.0.0
+Requires-Dist: numpy>=1.23.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: polars>=0.20.0
+Requires-Dist: scipy>=1.9.0
+Requires-Dist: scikit-learn>=1.3.0
+Requires-Dist: xgboost>=2.0.0
+Requires-Dist: gensim>=4.3.3
 Requires-Dist: nltk==3.8.1
-Requires-Dist: xgboost==3.0.2
-Requires-Dist: scipy<2.0.0,>=1.9.0
 Provides-Extra: dev
 Requires-Dist: pytest>=6.0; extra == "dev"
 Requires-Dist: black>=22.0; extra == "dev"
@@ -51,7 +51,7 @@ git clone https://github.com/AlabhyaMe/quick_sentiments.git
 Then run the command in the command prompt or notebook where git is cloned. Make sure you are in the main directory - quick_sentiments
 
 ```
-pip install .\dist\quick_sentiments-0.2.7-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
+pip install .\dist\quick_sentiments-0.2.9-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
 ```
 
 This Python package is designed to streamline natural language processing (NLP) for sentiment analysis. It achieves this by combining various vectorization techniques with machine learning models. The package automates the often complex and time-consuming vectorization process, allowing users to skip the manual coding typically required for this step. Additionally, users can easily select their preferred machine learning models to conduct sentiment analysis.
