@@ -34,11 +34,60 @@ def run_pipeline(
     Returns:
         dict: A dictionary containing the trained model, fitted vectorizer, label encoder, and evaluation results.
     """
+    # --- NEW: Mapping for Short and Long Names ---
+   
+
+    VEC_MAP = {
+        "bow": "BOW",
+        "bag_of_words": "BOW",
+
+        "tfidf": "tfidf",
+        "tf_idf": "tfidf",
+        "tf-idf": "tfidf",
+
+        "tf": "tf",
+        "term_frequency": "tf",
+
+        "glove": "glove_25",
+        "glove_25": "glove_25",
+        "glove50": "glove_25",
+        "glove_50": "glove_50",
+        "glove100": "glove_100",
+        "glove_100": "glove_100",
+        "glove200": "glove_200",
+        "glove_200": "glove_200",
+
+        "word2vec": "wv",
+        "wv": "wv",
+    }
+
+    MODEL_MAP = {
+        "rf": "rf",
+        "random_forest": "rf",
+
+        "logit": "logit",
+        "logistic_regression": "logit",
+        "lr": "logit",
+
+        "nb": "nb",
+        "naive_bayes": "nb",
+
+        "nn": "nn",
+        "mlp": "nn",
+        "neural_network": "nn",
+
+        "xgb": "XGB",
+        "xgboost": "XGB"
+    }
+
+    actual_vec_module = VEC_MAP.get(vectorizer_name.lower(), vectorizer_name)
+    actual_model_module = MODEL_MAP.get(model_name.lower(), model_name)
+
     print(f"--- Running Pipeline for {vectorizer_name.replace('_', ' ').title()} + {model_name.replace('_', ' ').title()} ---")
 
     # Import vectorizer from vect folder
     try:
-        vec_module = importlib.import_module(f"quick_sentiments.vect.{vectorizer_name}")
+        vec_module = importlib.import_module(f"quick_sentiments.vect.{actual_vec_module}")
         vectorize_train = getattr(vec_module, "vectorize_train")
         vectorize_test = getattr(vec_module, "vectorize_test")
     except (ImportError, AttributeError) as e:
@@ -47,7 +96,7 @@ def run_pipeline(
 
     # Import ML model from ml_algo folder
     try:
-        model_module = importlib.import_module(f"quick_sentiments.ml_algo.{model_name}")
+        model_module = importlib.import_module(f"quick_sentiments.ml_algo.{actual_model_module}")
         train_and_predict_function = getattr(model_module, "train_and_predict")
     except (ImportError, AttributeError) as e:
         print(f"Error loading ML model module/function: {e}")
