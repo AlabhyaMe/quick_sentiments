@@ -1,5 +1,5 @@
-[![PyPI Version](https://img.shields.io/pypi/v/quickSentiment)](https://pypi.org/project/quickSentiment/)
-[![PyPI Downloads](https://static.pepy.tech/badge/quickSentiment)](https://pepy.tech/project/quickSentiment)
+[![PyPI Version](https://img.shields.io/pypi/v/quickSentiment)](https://pypi.org/project/quick-sentiments/)
+[![PyPI Downloads](https://static.pepy.tech/badge/quickSentiment)](https://pepy.tech/project/quick-sentiments)
 #  Quick Sentiments
 
 ## Updates
