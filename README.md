@@ -8,7 +8,7 @@ The package is now live!
 ```bash
 !pip install quick-sentiments
 ```
-Alternatively, you can clone the git and install it locally.
+Alternatively, you can clone the git and install it locally. (Not recommended, please try the pip install)
 
 ```bash
 git clone https://github.com/AlabhyaMe/quick_sentiments.git
