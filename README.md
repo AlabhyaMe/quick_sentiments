@@ -1,3 +1,5 @@
+[![PyPI Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
+[![PyPI Downloads](https://static.pepy.tech/badge/quick-sentiments)](https://pepy.tech/project/quick-sentiments)
 #  Quick Sentiments
 
 ## Updates
@@ -6,7 +8,7 @@ The package is now live!
 ```bash
 !pip install quick-sentiments
 ```
-Alternatively, you can clone the git and install it locally.
+Alternatively, you can clone the git and install it locally. (Not recommended, please try the pip install)
 
 ```bash
 git clone https://github.com/AlabhyaMe/quick_sentiments.git
@@ -14,7 +16,7 @@ git clone https://github.com/AlabhyaMe/quick_sentiments.git
 Then run the command in the command prompt or notebook where git is cloned. Make sure you are in the main directory - quick_sentiments
 
 ```
-pip install .\dist\quick_sentiments-0.3.0-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
+pip install .\dist\quick_sentiments-0.3.5-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
 ```
 
 This Python package is designed to streamline natural language processing (NLP) for sentiment analysis. It achieves this by combining various vectorization techniques with machine learning models. The package automates the often complex and time-consuming vectorization process, allowing users to skip the manual coding typically required for this step. Additionally, users can easily select their preferred machine learning models to conduct sentiment analysis.
