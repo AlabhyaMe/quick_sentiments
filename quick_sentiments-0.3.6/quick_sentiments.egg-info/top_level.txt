@@ -1,5 +1,0 @@
-demo
-dist
-quick_sentiments
-quicktest
-tests
