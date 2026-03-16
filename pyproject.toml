@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quick-sentiments"
-version = "0.3.6" # major updates- polars does most pre_process now, syntax use case changed, documentation updated, and spacy pre_process
+version = "0.4.1" # minor parallel in rf, major changes allows more new python version
 authors = [
   { name="Alabhya Dahal", email="alabhya.dahal@gmail.com" },
 ]
@@ -27,7 +27,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Linguistic"
 ]
-requires-python = ">=3.10, <3.13"
+requires-python = ">=3.10, <3.15"
 dependencies = [
     # Core Data Libraries (Uncapped for performance)
     "numpy>=1.23.0",          # Allows NumPy 2.0 if other libs support it

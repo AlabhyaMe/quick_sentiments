@@ -48,7 +48,7 @@ def _process_linguistic(text: str, remove_stop_words: bool, lemmatize: bool) -> 
     return " ".join(tokens)
 
 
-def pre_process(
+def pre_process_nltk(
     df: Union[pl.DataFrame, pd.DataFrame],
     text_column: str,
     new_column_name: str = "processed_text",

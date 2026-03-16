@@ -6,7 +6,7 @@ import sys
 from typing import Union
 
 # --- 1. GLOBAL SETUP (Prevents Crashes) ---
-# Check and download NLTK resources immediately to avoid runtime errors
+
 try:
     nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
 except OSError:

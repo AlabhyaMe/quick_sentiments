@@ -21,7 +21,7 @@ def train_and_predict(X_train, y_train, X_test, perform_tuning=False, random_sta
         y_pred: predicted labels for test set.
         best_model: The best trained RandomForestClassifier model (either from GridSearchCV or simple fit).
     """
-    rf_model = RandomForestClassifier(random_state=random_state) # Base model for training
+    rf_model = RandomForestClassifier(n_jobs=-1,random_state=random_state) # Base model for training
 
     if perform_tuning:
         print("   - Starting Random Forest training with GridSearchCV for hyperparameter tuning...")
