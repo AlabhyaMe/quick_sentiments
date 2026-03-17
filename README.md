@@ -43,7 +43,7 @@ This Python package is designed to streamline natural language processing (NLP) 
   - Random Forest
   - XGBoost
   - Neural Network
-  - Naive Bayesian
+  - Naive Bayes
 - **Hyperparameter Tuning Support**:
   - All models are compatible with GridSearchCV.
   - By default, models run with standard parameters for quick testing.
