@@ -1,6 +1,5 @@
 [![PyPI Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
 [![PyPI Downloads](https://static.pepy.tech/badge/quick-sentiments)](https://pepy.tech/project/quick-sentiments)
-<img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" />
 #  Quick Sentiments
 
 ## Updates
@@ -44,6 +43,7 @@ This Python package is designed to streamline natural language processing (NLP) 
   - XGBoost
   - Naive Bayesian
   - Neural Network
+  - Naive Bayes
 - **Hyperparameter Tuning Support**:
   - All models are compatible with GridSearchCV.
   - By default, models run with standard parameters for quick testing.
