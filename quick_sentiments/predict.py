@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Dict, Any
 import polars as pl
 import pandas as pd
 import numpy as np
@@ -6,32 +6,26 @@ import numpy as np
 def make_predictions(
         new_data: Union[pl.DataFrame, pd.DataFrame],
         text_column_name: str,
-        vectorizer,
-        best_model,
-        label_encoder,
+        trained_results: Dict[str, Any],
         prediction_column_name: str = "predictions") -> pl.DataFrame:
     """
-Generates predictions for new data using a trained model and vectorizer.
+    Generates predictions for new data using the results dictionary from run_pipeline.
 
-    This function handles the complexities of different vectorizers (Scikit-Learn vs. Gensim)
-    and data formats (Pandas vs. Polars) automatically. It filters out missing data, 
-    vectorizes the text, predicts using the model, and decodes the labels back to 
-    their original string format (e.g., 'positive', 'negative').
+    This function automatically extracts the vectorizer, trained model, and label 
+    encoder from the `trained_results` dictionary. It handles missing data, 
+    text vectorization, and decodes numerical predictions back into human-readable 
+    labels (e.g., 'positive', 'negative').
 
     Args:
         new_data (Union[pl.DataFrame, pd.DataFrame]): 
             The input DataFrame containing the text to predict on.
         text_column_name (str): 
             The name of the column in `new_data` that contains the *preprocessed* text.
-        vectorizer (Any): 
-            The fitted vectorizer object. 
-            - For BOW/TF-IDF: A Scikit-Learn vectorizer (must have `.transform()`).
-            - For Word2Vec/GloVe: A Gensim KeyedVectors object.
-        best_model (Any): 
-            The trained machine learning model (e.g., RandomForest, XGBoost).
-        label_encoder (Any): 
-            The fitted LabelEncoder used during training to decode predictions 
-            back to strings.
+        trained_results (Dict[str, Any]): 
+            The dictionary returned by `run_pipeline`. Must contain:
+            - "vectorizer_object"
+            - "model_object"
+            - "label_encoder"
         prediction_column_name (str, optional): 
             The name for the new column containing predictions. Defaults to "predictions".
 
@@ -41,17 +35,17 @@ Generates predictions for new data using a trained model and vectorizer.
             Rows with missing text (None/NaN) in the target column will be dropped.
 
     Example:
-        >>> # Assuming you have trained_results from run_pipeline()
+        >>> # Get results from the pipeline
+        >>> results = run_pipeline(df_train, "text", "label")
+        >>> 
+        >>> # Predict on new data using the whole results object
         >>> preds = make_predictions(
         ...     new_data=df_new,
         ...     text_column_name="clean_text",
-        ...     vectorizer=trained_results["vectorizer_object"],
-        ...     best_model=trained_results["model_object"],
-        ...     label_encoder=trained_results["label_encoder"]
+        ...     trained_results=results
         ... )
-        >>> print(preds.select(["clean_text", "predictions"]))
-        
     """
+
     # Convert pandas to Polars if needed
     if isinstance(new_data, pd.DataFrame):
         new_data = pl.from_pandas(new_data)
@@ -61,6 +55,10 @@ Generates predictions for new data using a trained model and vectorizer.
     # Drop nulls in the text column
     new_data = new_data.drop_nulls(subset=[text_column_name])
     texts = new_data[text_column_name].to_list()
+
+    vectorizer = trained_results["vectorizer_object"]
+    best_model = trained_results["model_object"]
+    label_encoder = trained_results["label_encoder"]
     
     # Generate features
     if hasattr(vectorizer, 'transform'):

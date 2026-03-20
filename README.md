@@ -1,5 +1,6 @@
 [![PyPI Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
 [![PyPI Downloads](https://static.pepy.tech/badge/quick-sentiments)](https://pepy.tech/project/quick-sentiments)
+<img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" />
 #  Quick Sentiments
 
 ## Updates
@@ -16,7 +17,7 @@ git clone https://github.com/AlabhyaMe/quick_sentiments.git
 Then run the command in the command prompt or notebook where git is cloned. Make sure you are in the main directory - quick_sentiments
 
 ```
-pip install .\dist\quick_sentiments-0.3.5-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
+pip install .\dist\quick_sentiments-0.4.1-py3-none-any.whl # please note, sometimes I might not have updated the version number to the  latest
 ```
 
 This Python package is designed to streamline natural language processing (NLP) for sentiment analysis. It achieves this by combining various vectorization techniques with machine learning models. The package automates the often complex and time-consuming vectorization process, allowing users to skip the manual coding typically required for this step. Additionally, users can easily select their preferred machine learning models to conduct sentiment analysis.
@@ -36,10 +37,12 @@ This Python package is designed to streamline natural language processing (NLP) 
   - TF-IDF (Term Frequency-Inverse Document Frequency)
   - Word Embeddings (Word2Vec - pre-trained Google News 300-dim model)
   - Glove Embedding (25,50,100 and 200)
+  - Hugging Face (The module is optional but user have to download the required dependencies themself)
 - **Multiple Machine Learning Algorithms**:
   - Logistic Regression
   - Random Forest
   - XGBoost
+  - Naive Bayesian
   - Neural Network
 - **Hyperparameter Tuning Support**:
   - All models are compatible with GridSearchCV.
