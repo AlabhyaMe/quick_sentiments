@@ -46,8 +46,9 @@ This Python package is designed to streamline natural language processing (NLP) 
   - Naive Bayesian
   - Neural Network
   - Naive Bayes
+  - Tensorflow Models
 - **Hyperparameter Tuning Support**:
-  - All models are compatible with GridSearchCV.
+  - All models are compatible with GridSearchCV. Tensorflow has it's own tuning
   - By default, models run with standard parameters for quick testing.
   - Grid search options are built-in and ready to use if needed.
 - **Modular Design**: Each component is cleanly separated into its own module.

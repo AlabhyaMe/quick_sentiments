@@ -19,6 +19,7 @@ quick_sentiments/ml_algo/logit.py
 quick_sentiments/ml_algo/nb.py
 quick_sentiments/ml_algo/nn.py
 quick_sentiments/ml_algo/rf.py
+quick_sentiments/ml_algo/tf_model.py
 quick_sentiments/vect/BOW.py
 quick_sentiments/vect/__init__.py
 quick_sentiments/vect/glove_100.py

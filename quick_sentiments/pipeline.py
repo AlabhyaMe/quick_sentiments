@@ -116,6 +116,13 @@ def run_pipeline(
         "xgboost": "XGB"
     }
 
+    MODEL_MAP = {
+        # ... your other models ...
+        "tf": "tf_model",
+        "tensorflow": "tf_model",
+        "keras": "tf_model"
+    }
+
     actual_vec_module = VEC_MAP.get(vectorizer_name.lower(), vectorizer_name)
     actual_model_module = MODEL_MAP.get(model_name.lower(), model_name)
 

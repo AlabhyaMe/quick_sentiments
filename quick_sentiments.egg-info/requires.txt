@@ -14,5 +14,9 @@ black>=22.0
 twine
 build
 
+[dl]
+tensorflow>=2.13.0
+scikeras>=0.12.0
+
 [hf]
 sentence-transformers>=2.2.0
