@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: quick-sentiments
-Version: 0.4.5
+Version: 0.4.7
 Summary: Sentiment Analysis pipeline
 Author: Alabhya Dahal
 Author-email: Alabhya Dahal <alabhya.dahal@gmail.com>
@@ -92,8 +92,9 @@ This Python package is designed to streamline natural language processing (NLP) 
   - Naive Bayesian
   - Neural Network
   - Naive Bayes
+  - Tensorflow Models
 - **Hyperparameter Tuning Support**:
-  - All models are compatible with GridSearchCV.
+  - All models are compatible with GridSearchCV. Tensorflow has it's own tuning
   - By default, models run with standard parameters for quick testing.
   - Grid search options are built-in and ready to use if needed.
 - **Modular Design**: Each component is cleanly separated into its own module.

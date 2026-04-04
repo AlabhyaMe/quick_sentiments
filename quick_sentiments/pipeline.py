@@ -205,6 +205,7 @@ def run_pipeline(
                                                               X_test_vectorized, 
                                                               perform_tuning=perform_tuning,
                                                               random_state=random_state)
+    y_prob = trained_model_object.predict_proba(X_test_vectorized)[:, 1]
 
     # Evaluate
     print("4. Evaluating model...")
@@ -221,6 +222,7 @@ def run_pipeline(
         "label_encoder": label_encoder,
         "y_test": y_test,
         "y_pred": y_pred,
+        "y_prob": y_prob,
         "accuracy": accuracy_score(y_test, y_pred),
         "report": classification_report(y_test, y_pred, output_dict=True, target_names=label_encoder.classes_)
     }
