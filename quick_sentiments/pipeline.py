@@ -113,11 +113,8 @@ def run_pipeline(
         "neural_network": "nn",
 
         "xgb": "XGB",
-        "xgboost": "XGB"
-    }
-
-    MODEL_MAP = {
-        # ... your other models ...
+        "xgboost": "XGB",
+    
         "tf": "tf_model",
         "tensorflow": "tf_model",
         "keras": "tf_model"
@@ -154,50 +151,39 @@ def run_pipeline(
     elif not isinstance(df, pl.DataFrame):
         raise TypeError(f"Expected Polars or pandas DataFrame, got {type(df)}")
     
-    # Polars DataFrame handling
-    X_text = df[text_column_name].to_list()
-    y_raw = df[sentiment_column_name].to_list()
-    
+      
     # --- NEW: Check for and drop None values in X_text and y_raw ---
-    initial_data_len = len(X_text)
+    initial_data_len = len(df)
+    df = df.drop_nulls(subset=[text_column_name, sentiment_column_name])
     
-    # Filter out pairs where either X_text element or y_raw element is None
-    # Use zip to iterate over both lists simultaneously and filter
-    filtered_data = [(x, y_val) for x, y_val in zip(X_text, y_raw) if x is not None and y_val is not None]
     
-    # Unzip the filtered data back into X_text and y_raw
-    if filtered_data: # Check if filtered_data is not empty to avoid unpacking error
-        X_text, y_raw = zip(*filtered_data)
-        X_text = list(X_text) # Convert back to list
-        y_raw = list(y_raw)   # Convert back to list
-    else:
-        # Handle case where all data might be None
-        print("WARNING: All data rows contained missing values after initial extraction. Cannot proceed with training.")
-        return None
-
-    dropped_rows_count = initial_data_len - len(X_text)
+    dropped_rows_count = initial_data_len - len(df)
     if dropped_rows_count > 0:
-        print(f"WARNING: Dropped {dropped_rows_count} rows due to missing values (None) in '{text_column_name}' or '{sentiment_column_name}' columns. Original rows: {initial_data_len}, Rows after dropping: {len(X_text)}")
-    else:
-        print("No missing values (None) found in text or sentiment columns. Proceeding with all rows.")
-    # ------------------------------------------------------------------
+        print(f"WARNING: Dropped {dropped_rows_count} rows. Rows left: {len(df)}")
 
-    # Label Encoding for y_raw
+    # 2. Extract and Split
+    # Only convert to list at the last possible second for the vectorizer
+    X_text = df[text_column_name].to_list() 
+    
     label_encoder = LabelEncoder()
-    y = label_encoder.fit_transform(y_raw)
-    print(f"Labels encoded: Original -> {label_encoder.classes_}, Encoded -> {np.unique(y)}")
+    # For labels, NumPy is much more memory efficient than a Python list
+    y = label_encoder.fit_transform(df[sentiment_column_name].to_numpy())
+    
+    # Clear the DataFrame from memory if you don't need it anymore
+    del df
 
     # Split data Before vectorization
     print("1. Splitting data into train/test...")
     X_train, X_test, y_train, y_test = train_test_split(
         X_text, y, test_size=0.2, random_state=random_state, stratify=y
     )
+    del X_text
 
     # Vectorize the dataset (X)
     print("2. Vectorizing  dataset (X)...")
     X_train_vectorized, fitted_vectorizer_object,norm = vectorize_train(X_train)
     X_test_vectorized = vectorize_test(X_test, fitted_vectorizer_object,norm)
-
+    del X_train, X_test
     # Train + predict
     print("3. Training and predicting...")
     y_pred, trained_model_object = train_and_predict_function(X_train_vectorized, 
