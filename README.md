@@ -1,4 +1,4 @@
-[![PyPI Package Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
+[![PyPI Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
 [![PyPI Downloads](https://static.pepy.tech/badge/quick-sentiments)](https://pepy.tech/project/quick-sentiments)
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" />
 
