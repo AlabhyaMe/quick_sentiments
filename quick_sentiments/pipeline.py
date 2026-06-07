@@ -17,7 +17,9 @@ def run_pipeline(
     text_column_name: str,
     sentiment_column_name: str,
     perform_tuning: bool = False,
-    random_state: int = 42
+    random_state: int = 42,
+    param_grid: dict = None,
+    interactive: bool = True
 ):
     """
     Orchestrates the full sentiment analysis pipeline: Vectorization -> Training -> Evaluation.
@@ -190,7 +192,9 @@ def run_pipeline(
                                                               y_train, 
                                                               X_test_vectorized, 
                                                               perform_tuning=perform_tuning,
-                                                              random_state=random_state)
+                                                              random_state=random_state
+                                                              param_grid=param_grid,
+                                                              interactive=interactive)
     y_prob = trained_model_object.predict_proba(X_test_vectorized)[:, 1]
 
     # Evaluate

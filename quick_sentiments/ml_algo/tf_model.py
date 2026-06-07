@@ -3,6 +3,7 @@
 import numpy as np
 from scipy.sparse import issparse
 from sklearn.model_selection import GridSearchCV
+import warnings
 
 # 1. Gracefully handle the Optional Dependencies
 try:
@@ -31,7 +32,15 @@ def build_keras_model(input_dim, num_classes, hidden_units=128, dropout_rate=0.3
     )
     return model
 
-def train_and_predict(X_train, y_train, X_test, perform_tuning=False, random_state=42):
+def train_and_predict(
+    X_train, 
+    y_train, 
+    X_test, 
+    perform_tuning=False, 
+    param_grid=None,
+    interactive_mode=True,
+    random_state=42
+):
     """
     Trains a TensorFlow Neural Network seamlessly within the scikit-learn pipeline.
     """
@@ -57,28 +66,69 @@ def train_and_predict(X_train, y_train, X_test, perform_tuning=False, random_sta
         verbose=0 
     )
 
+    # A safe defined grid in case none is provided, ensuring the function can run without errors
+    default_grid = {
+        'model__hidden_units': [64, 128],
+        'model__dropout_rate': [0.2, 0.4],
+        'batch_size': [32, 64]
+    }
+
     if perform_tuning:
-        print("   - Starting TensorFlow training with GridSearchCV for hyperparameter tuning...")
-        
-        param_grid = {
-            'model__hidden_units': [64, 128],
-            'model__dropout_rate': [0.2, 0.4],
-            'batch_size': [32, 64]
-        }
+        if param_grid is None:
+            print("   - Starting TensorFlow training with DEFAULT PARAMETER, GridSearchCV for hyperparameter tuning...")
+            target_grid = default_grid
+        else:
+            print("   - Starting TensorFlow training with CUSTOM PARAMETER, GridSearchCV for hyperparameter tuning...")
+            target_grid = param_grid
         
         grid_search = GridSearchCV(
             estimator=keras_estimator,
-            param_grid=param_grid,
+            param_grid=target_grid,
             cv=3, 
             scoring='accuracy',
             n_jobs=-1,
             verbose=1
         )
         
-        grid_search.fit(X_train, y_train)
+        # The Safety Net
+        try:
+            grid_search.fit(X_train, y_train)
+            
+        except Exception as e:  # <-- Broadened to catch various TF/Keras crash types
+            # If a custom grid was passed and it failed...
+            if param_grid is not None:
+                print(f"\n[ERROR] Your custom hyperparameter grid failed: {e}")
+                
+                if interactive_mode:
+                    # The Beginner Path: Ask for permission to fall back
+                    user_choice = input("Would you like to fall back to the default parameter grid? (Y/N): ").strip().lower()
+                    
+                    if user_choice in ['y', 'yes']:
+                        print("   - Falling back to default parameters...")
+                        grid_search = GridSearchCV(
+                            estimator=keras_estimator,
+                            param_grid=default_grid,
+                            cv=3,
+                            scoring='accuracy',
+                            n_jobs=-1,
+                            verbose=1
+                        )
+                        grid_search.fit(X_train, y_train)
+                    else:
+                        print("   - Aborting execution.")
+                        raise e 
+                else:
+                    # The Production Path: Fail fast
+                    print("   - Interactive mode is off. Aborting execution.")
+                    raise e
+            else:
+                # If the default grid itself failed (likely an OOM or shape issue), crash it.
+                raise e
+
         best_model = grid_search.best_estimator_
         print("\n   - Best Hyperparameters found:")
         print(grid_search.best_params_)
+        print(f"   - Best Cross-Validation Score (Accuracy): {grid_search.best_score_:.4f}")
         
     else:
         print("   - Training TensorFlow model with default parameters...")
