@@ -192,9 +192,9 @@ def run_pipeline(
                                                               y_train, 
                                                               X_test_vectorized, 
                                                               perform_tuning=perform_tuning,
-                                                              random_state=random_state
+                                                              random_state=random_state,
                                                               param_grid=param_grid,
-                                                              interactive=interactive)
+                                                              interactive_mode=interactive)
     y_prob = trained_model_object.predict_proba(X_test_vectorized)[:, 1]
 
     # Evaluate

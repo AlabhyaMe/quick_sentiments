@@ -10,7 +10,7 @@ def train_and_predict(X_train,
                       X_test, 
                       perform_tuning=False, 
                       param_grid=None,
-                      interactive=True,
+                      interactive_mode=True,
                       random_state=42):
     """
         Trains Logistic Regression model (with optional hyperparameter tuning) and predicts on test data.
@@ -68,7 +68,7 @@ def train_and_predict(X_train,
             if param_grid is not None:
                 print(f"\n[ERROR] Your custom hyperparameter grid failed: {e}")
                 
-                if interactive:
+                if interactive_mode:
                     # The Beginner Path: Ask for permission to fall back
                     user_choice = input("Would you like to fall back to the default parameter grid? (Y/N): ").strip().lower()
                     
