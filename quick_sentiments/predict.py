@@ -48,6 +48,7 @@ def make_predictions(
     vectorizer = trained_results["vectorizer_object"]
     best_model = trained_results["model_object"]
     label_encoder = trained_results["label_encoder"]
+    norm = trained_results.get("norm_object")
     
     # Generate features safely
     if hasattr(vectorizer, 'transform'):
@@ -58,7 +59,9 @@ def make_predictions(
             vectors = [vectorizer[word] for word in words if word in vectorizer]
             return np.mean(vectors, axis=0) if vectors else np.zeros(vectorizer.vector_size)
         new_features = np.array([text_to_vector(text) for text in texts])
-    
+    if norm is not None:
+        new_features = norm.transform(new_features)
+        
     # Keras/Sparse Safety Net
     if type(best_model).__name__ == "KerasClassifier" and issparse(new_features):
         new_features = new_features.toarray()

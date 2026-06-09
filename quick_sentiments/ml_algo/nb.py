@@ -41,6 +41,9 @@ def train_and_predict(
             'fit_prior': [True, False]
         }
 
+    # --- FIXED: Initialize best_model so it always exists ---
+    best_model = None
+
     # STEP 2: Training with optional Tuning
     if perform_tuning:
         if param_grid is None:
@@ -63,13 +66,19 @@ def train_and_predict(
         try:
             grid_search.fit(X_train, y_train)
             
+            # --- FIXED: Save the winning model on success ---
+            best_model = grid_search.best_estimator_
+            
+            print("\n   - Best Hyperparameters found:")
+            print(grid_search.best_params_)
+            print(f"   - Best Cross-Validation Score (F1-weighted): {grid_search.best_score_:.4f}")
+            
         except ValueError as e:
-            # If a custom grid was passed and it failed...
+            # --- 1. THE INPUT SAFETY NET ---
             if param_grid is not None:
                 print(f"\n[ERROR] Your custom hyperparameter grid failed: {e}")
                 
                 if interactive_mode:
-                    # The Beginner Path: Ask for permission to fall back
                     user_choice = input("Would you like to fall back to the default parameter grid? (Y/N): ").strip().lower()
                     
                     if user_choice in ['y', 'yes']:
@@ -83,22 +92,50 @@ def train_and_predict(
                             verbose=1
                         )
                         grid_search.fit(X_train, y_train)
+                        
+                        # --- FIXED: Save the fallback model ---
+                        best_model = grid_search.best_estimator_
+                        
+                        print("\n   - Best Hyperparameters found (Default Grid):")
+                        print(grid_search.best_params_)
                     else:
                         print("   - Aborting execution.")
                         raise e 
                 else:
-                    # The Production Path: Fail fast
                     print("   - Interactive mode is off. Aborting execution.")
                     raise e
             else:
-                # If the default grid itself failed (likely a data shape issue), crash it.
                 raise e
 
-        best_model = grid_search.best_estimator_
-        print("\n   - Best Hyperparameters found:")
-        print(grid_search.best_params_)
-        print(f"   - Best Cross-Validation Score (F1-weighted): {grid_search.best_score_:.4f}")
-        
+        except MemoryError as e:
+            # --- 2. THE DATA SAFETY NET ---
+            print("\n[CRITICAL ERROR] The cluster ran out of memory while tuning!")
+            
+            if interactive_mode:
+                user_choice = input("Would you like to fall back to training a default model on a 20% random subsample? (Y/N): ").strip().lower()
+                
+                if user_choice in ['y', 'yes']:
+                    print(f"   - Slicing data matrix and falling back to base {model_type} Naive Bayes (no grid search)...")
+                    
+                    # Safely generate random indices
+                    sample_size = int(X_train.shape[0] * 0.2)
+                    np.random.seed(random_state)
+                    indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
+                    
+                    X_train_small = X_train[indices]
+                    y_train_small = y_train[indices]
+                    
+                    # Abandon grid search, fit the base model
+                    best_model = nb_model
+                    best_model.fit(X_train_small, y_train_small)
+                    print("   - [SUCCESS] Subsample training complete.")
+                else:
+                    print("   - Aborting execution.")
+                    raise e
+            else:
+                print("   - Interactive mode is off. Aborting execution.")
+                raise e
+
     else:
         print(f"   - Training {model_type} Naive Bayes with default parameters (no hyperparameter tuning)...")
         best_model = nb_model
@@ -107,6 +144,7 @@ def train_and_predict(
 
     # STEP 3: Predict
     y_pred = best_model.predict(X_test)
+    y_prob_matrix = best_model.predict_proba(X_test)
     print("Best model parameters:", best_model.get_params())
     
-    return y_pred, best_model
+    return y_pred, best_model, y_prob_matrix

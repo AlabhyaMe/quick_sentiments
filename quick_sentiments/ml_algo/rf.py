@@ -42,6 +42,7 @@ def train_and_predict(
         'min_samples_leaf': [1, 2],
         'class_weight': [None, 'balanced']
     }
+    best_model = None
 
     if perform_tuning:
         if param_grid is None:
@@ -63,7 +64,8 @@ def train_and_predict(
         # Check if grid parameters are valid before fitting
         try:
             grid_search.fit(X_train, y_train)
-            
+            best_model = grid_search.best_estimator_
+            print("\n   - Best Hyperparameters found:")
         except ValueError as e:
             # If a custom grid was passed and it failed...
             if param_grid is not None:
@@ -84,6 +86,7 @@ def train_and_predict(
                             verbose=1
                         )
                         grid_search.fit(X_train, y_train)
+                        best_model = grid_search.best_estimator_
                     else:
                         print("   - Aborting execution.")
                         raise e 
@@ -95,10 +98,34 @@ def train_and_predict(
                 # If the default grid itself failed (likely a data shape issue), crash it.
                 raise e
 
-        best_model = grid_search.best_estimator_
-        print("\n   - Best Hyperparameters found:")
-        print(grid_search.best_params_)
-        print(f"   - Best Cross-Validation Score (F1-weighted): {grid_search.best_score_:.4f}")
+        except MemoryError as e:
+            # --- 2. THE DATA SAFETY NET ---
+            print("\n[CRITICAL ERROR] The cluster ran out of memory while tuning!")
+            
+            if interactive_mode:
+                user_choice = input("Would you like to fall back to training a default model on a 20% random subsample? (Y/N): ").strip().lower()
+                
+                if user_choice in ['y', 'yes']:
+                    print("   - Slicing data matrix and falling back to base Random Forest (no grid search)...")
+                    
+                    # Safely generate random indices for sparse or dense matrices
+                    sample_size = int(X_train.shape[0] * 0.2)
+                    np.random.seed(random_state)
+                    indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
+                    
+                    X_train_small = X_train[indices]
+                    y_train_small = y_train[indices]
+                    
+                    # Abandon the grid search completely. Just fit the base model so the pipeline finishes.
+                    best_model = rf_model
+                    best_model.fit(X_train_small, y_train_small)
+                    print("   - [SUCCESS] Subsample training complete.")
+                else:
+                    print("   - Aborting execution.")
+                    raise e
+            else:
+                print("   - Interactive mode is off. Aborting execution.")
+                raise e
 
     else:
         print("   - Training Random Forest with default parameters (no hyperparameter tuning)...")
@@ -108,7 +135,8 @@ def train_and_predict(
 
     # Make predictions on the test set using the best model (tuned or default)
     y_pred = best_model.predict(X_test)
+    y_prob_matrix = best_model.predict_proba(X_test)
     print("Best model parameters:", best_model.get_params())
 
     # Return both the predictions and the best model object
-    return y_pred, best_model
+    return y_pred, best_model, y_prob_matrix

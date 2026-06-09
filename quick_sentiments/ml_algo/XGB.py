@@ -1,6 +1,7 @@
 # ml_algo/XGB.py
 
 from xgboost import XGBClassifier
+from xgboost.core import XGBoostError  # <-- NEW: Import XGBoost's internal error class
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import numpy as np
@@ -16,19 +17,6 @@ def train_and_predict(
 ):
     """
     Trains XGBoostClassifier model (with optional hyperparameter tuning) and predicts on test data.
-
-    Args:
-        X_train: training features (e.g., NumPy array or sparse matrix).
-        y_train: training labels (numerical, e.g., 0, 1, 2...).
-        X_test: test features (e.g., NumPy array or sparse matrix).
-        perform_tuning (bool): If True, performs GridSearchCV. If False, trains
-                               the model with default parameters. Defaults to False.
-        param_grid (dict): Optional custom dictionary for GridSearchCV.
-        interactive_mode (bool): If True, prompts for fallback on grid failure.
-
-    Returns:
-        y_pred: predicted labels for test set.
-        best_model: The best trained XGBoostClassifier model (either from GridSearchCV or simple fit).
     """
     print("   - Starting XGBoost training...")
 
@@ -45,11 +33,10 @@ def train_and_predict(
         scoring_metric = 'f1_weighted' # Or 'accuracy'
 
     # Base XGBClassifier model
-    # verbosity=0 to suppress excessive output from XGBoost itself during GridSearchCV
     xgb_model = XGBClassifier(
         objective=xgb_objective,
         eval_metric=xgb_eval_metric,
-        use_label_encoder=False, # Suppress warning for newer versions
+        use_label_encoder=False, 
         random_state=random_state,
         num_class=num_classes if num_classes > 2 else None,
         verbosity=0 
@@ -63,6 +50,9 @@ def train_and_predict(
         'subsample': [0.8, 1.0],
         'colsample_bytree': [0.8, 1.0]
     }
+
+    # --- FIXED: Initialize best_model so it always exists ---
+    best_model = None
 
     if perform_tuning:
         if param_grid is None:
@@ -85,13 +75,19 @@ def train_and_predict(
         try:
             grid_search.fit(X_train, y_train)
             
-        except Exception as e:  # <-- Catch Exception because XGBoost throws XGBoostError
-            # If a custom grid was passed and it failed...
+            # --- FIXED: Save the winning model on success ---
+            best_model = grid_search.best_estimator_
+            
+            print("\n   - Best Hyperparameters found:")
+            print(grid_search.best_params_)
+            print(f"   - Best Cross-Validation Score ({scoring_metric}): {grid_search.best_score_:.4f}")
+            
+        except ValueError as e:
+            # --- 1. THE INPUT SAFETY NET ---
             if param_grid is not None:
                 print(f"\n[ERROR] Your custom hyperparameter grid failed: {e}")
                 
                 if interactive_mode:
-                    # The Beginner Path: Ask for permission to fall back
                     user_choice = input("Would you like to fall back to the default parameter grid? (Y/N): ").strip().lower()
                     
                     if user_choice in ['y', 'yes']:
@@ -105,31 +101,58 @@ def train_and_predict(
                             verbose=1
                         )
                         grid_search.fit(X_train, y_train)
+                        
+                        # --- FIXED: Save the fallback model ---
+                        best_model = grid_search.best_estimator_
+                        
                     else:
                         print("   - Aborting execution.")
                         raise e 
                 else:
-                    # The Production Path: Fail fast
                     print("   - Interactive mode is off. Aborting execution.")
                     raise e
             else:
-                # If the default grid itself failed, crash it.
                 raise e
 
-        best_model = grid_search.best_estimator_
+        # --- FIXED: Catch BOTH Python MemoryError and XGBoost's C++ crashes ---
+        except (MemoryError, XGBoostError) as e:
+            # --- 2. THE DATA SAFETY NET ---
+            print("\n[CRITICAL ERROR] The cluster ran out of memory or XGBoost failed while tuning!")
+            
+            if interactive_mode:
+                user_choice = input("Would you like to fall back to training a default model on a 20% random subsample? (Y/N): ").strip().lower()
+                
+                if user_choice in ['y', 'yes']:
+                    print("   - Slicing data matrix and falling back to base XGBoost model (no grid search)...")
+                    
+                    # Safely generate random indices
+                    sample_size = int(X_train.shape[0] * 0.2)
+                    np.random.seed(random_state)
+                    indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
+                    
+                    X_train_small = X_train[indices]
+                    y_train_small = y_train[indices]
+                    
+                    # Abandon grid search, fit the base model
+                    best_model = xgb_model
+                    best_model.fit(X_train_small, y_train_small)
+                    print("   - [SUCCESS] Subsample training complete.")
+                else:
+                    print("   - Aborting execution.")
+                    raise e
+            else:
+                print("   - Interactive mode is off. Aborting execution.")
+                raise e
 
-        print("\n   - Best Hyperparameters found:")
-        print(grid_search.best_params_)
-        print(f"   - Best Cross-Validation Score ({scoring_metric}): {grid_search.best_score_:.4f}")
-        
     else:
         print("   - Training XGBoost with default parameters (no hyperparameter tuning)...")
         best_model = xgb_model 
         best_model.fit(X_train, y_train) 
         print("   - Model trained with default parameters.")
 
-    # Make predictions on the test set
+    # Make predictions safely using whichever model survived
     y_pred = best_model.predict(X_test)
-    print("Best model parameters:", best_model.get_params())
+    y_prob_matrix = best_model.predict_proba(X_test)
+    print("\nBest model parameters:", best_model.get_params())
 
-    return y_pred, best_model
+    return y_pred, best_model, y_prob_matrix

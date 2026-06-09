@@ -183,19 +183,24 @@ def run_pipeline(
 
     # Vectorize the dataset (X)
     print("2. Vectorizing  dataset (X)...")
-    X_train_vectorized, fitted_vectorizer_object,norm = vectorize_train(X_train)
-    X_test_vectorized = vectorize_test(X_test, fitted_vectorizer_object,norm)
-    del X_train, X_test
+
+    #Ensure that we delete the original X_train and X_test after vectorization to free up memory, especially for large datasets.
+    try:
+        X_train_vectorized, fitted_vectorizer_object, norm = vectorize_train(X_train)
+        X_test_vectorized = vectorize_test(X_test, fitted_vectorizer_object, norm)
+    finally:
+        del X_train, X_test
+
     # Train + predict
     print("3. Training and predicting...")
-    y_pred, trained_model_object = train_and_predict_function(X_train_vectorized, 
+    y_pred, trained_model_object,y_prob_matrix = train_and_predict_function(X_train_vectorized, 
                                                               y_train, 
                                                               X_test_vectorized, 
                                                               perform_tuning=perform_tuning,
                                                               random_state=random_state,
                                                               param_grid=param_grid,
                                                               interactive_mode=interactive)
-    y_prob = trained_model_object.predict_proba(X_test_vectorized)[:, 1]
+    
 
     # Evaluate
     print("4. Evaluating model...")
@@ -212,7 +217,8 @@ def run_pipeline(
         "label_encoder": label_encoder,
         "y_test": y_test,
         "y_pred": y_pred,
-        "y_prob": y_prob,
+        "y_prob_matrix": y_prob_matrix,
+        "norm_object": norm,
         "accuracy": accuracy_score(y_test, y_pred),
         "report": classification_report(y_test, y_pred, output_dict=True, target_names=label_encoder.classes_)
     }

@@ -18,19 +18,6 @@ def train_and_predict(
     """
     Trains a Multi-layer Perceptron (MLP) Classifier model (Neural Network)
     (with optional hyperparameter tuning) and predicts on test data.
-
-    Args:
-        X_train: training features (e.g., NumPy array or sparse matrix).
-        y_train: training labels (list or NumPy array).
-        X_test: test features (e.g., NumPy array or sparse matrix).
-        perform_tuning (bool): If True, performs GridSearchCV. If False, trains
-                               the model with default parameters. Defaults to False.
-        param_grid (dict): Optional custom dictionary for GridSearchCV.
-        interactive_mode (bool): If True, prompts for fallback on grid failure.
-
-    Returns:
-        y_pred: predicted labels for test set.
-        best_model: The best trained MLPClassifier model (either from GridSearchCV or simple fit).
     """
     # Base model for training, with a max_iter for convergence
     mlp_model = MLPClassifier(random_state=random_state, max_iter=1000)
@@ -42,6 +29,9 @@ def train_and_predict(
         'solver': ['adam', 'sgd'],
         'alpha': [0.0001, 0.001, 0.01]
     }
+
+    # --- FIXED: Initialize best_model so it always exists ---
+    best_model = None
 
     if perform_tuning:
         if param_grid is None:
@@ -61,17 +51,23 @@ def train_and_predict(
             verbose=1
         )
 
-        # Check if grid parameters are valid before fitting
+        # Check if grid parameters are valid (and fit in RAM) before proceeding
         try:
             grid_search.fit(X_train, y_train)
             
+            # --- FIXED: Save the winning model on success ---
+            best_model = grid_search.best_estimator_
+            
+            print("\n   - Best Hyperparameters found:")
+            print(grid_search.best_params_)
+            print(f"   - Best Cross-Validation Score (F1-weighted): {grid_search.best_score_:.4f}")
+            
         except ValueError as e:
-            # If a custom grid was passed and it failed...
+            # --- 1. THE INPUT SAFETY NET ---
             if param_grid is not None:
                 print(f"\n[ERROR] Your custom hyperparameter grid failed: {e}")
                 
                 if interactive_mode:
-                    # The Beginner Path: Ask for permission to fall back
                     user_choice = input("Would you like to fall back to the default parameter grid? (Y/N): ").strip().lower()
                     
                     if user_choice in ['y', 'yes']:
@@ -85,28 +81,59 @@ def train_and_predict(
                             verbose=1
                         )
                         grid_search.fit(X_train, y_train)
+                        
+                        # --- FIXED: Save the fallback model ---
+                        best_model = grid_search.best_estimator_
+                        
+                        print("\n   - Best Hyperparameters found (Default Grid):")
+                        print(grid_search.best_params_)
                     else:
                         print("   - Aborting execution.")
                         raise e 
                 else:
-                    # The Production Path: Fail fast
                     print("   - Interactive mode is off. Aborting execution.")
                     raise e
             else:
-                # If the default grid itself failed (likely a data shape issue), crash it.
                 raise e
 
-        best_model = grid_search.best_estimator_
-        print("\n   - Best Hyperparameters found:")
-        print(grid_search.best_params_)
-        print(f"   - Best Cross-Validation Score (F1-weighted): {grid_search.best_score_:.4f}")
+        except MemoryError as e:
+            # --- 2. THE DATA SAFETY NET ---
+            print("\n[CRITICAL ERROR] The cluster ran out of memory while tuning!")
+            
+            if interactive_mode:
+                user_choice = input("Would you like to fall back to training a default model on a 20% random subsample? (Y/N): ").strip().lower()
+                
+                if user_choice in ['y', 'yes']:
+                    print("   - Slicing data matrix and falling back to base MLP Classifier (no grid search)...")
+                    
+                    # Safely generate random indices
+                    sample_size = int(X_train.shape[0] * 0.2)
+                    np.random.seed(random_state)
+                    indices = np.random.choice(X_train.shape[0], sample_size, replace=False)
+                    
+                    X_train_small = X_train[indices]
+                    y_train_small = y_train[indices]
+                    
+                    # Abandon grid search, fit the base model
+                    best_model = mlp_model
+                    best_model.fit(X_train_small, y_train_small)
+                    print("   - [SUCCESS] Subsample training complete.")
+                else:
+                    print("   - Aborting execution.")
+                    raise e
+            else:
+                print("   - Interactive mode is off. Aborting execution.")
+                raise e
+
     else:
         print("   - Training MLPClassifier with default parameters (no hyperparameter tuning)...")
-        best_model = mlp_model # Use the base model directly
-        best_model.fit(X_train, y_train) # Fit it on X_train, y_train
+        best_model = mlp_model 
+        best_model.fit(X_train, y_train) 
         print("   - Model trained with default parameters.")
 
+    # Make predictions safely using whichever model survived
     y_pred = best_model.predict(X_test)
-    print("Best model parameters:", best_model.get_params())
+    y_prob_matrix = best_model.predict_proba(X_test)
+    print("\nBest model parameters:", best_model.get_params())
 
-    return y_pred, best_model
+    return y_pred, best_model, y_prob_matrix
