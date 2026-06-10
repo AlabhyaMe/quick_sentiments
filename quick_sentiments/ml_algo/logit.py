@@ -10,7 +10,7 @@ def train_and_predict(X_train,
                       X_test, 
                       perform_tuning=False, 
                       param_grid=None,
-                      interactive_mode=True,
+                      interactive_mode=False,
                       random_state=42):
     """
     Trains Logistic Regression model (with optional hyperparameter tuning) and predicts on test data.

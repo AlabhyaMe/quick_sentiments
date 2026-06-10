@@ -38,7 +38,7 @@ def train_and_predict(
     X_test, 
     perform_tuning=False, 
     param_grid=None,
-    interactive_mode=True,
+    interactive_mode=False,
     random_state=42
 ):
     """

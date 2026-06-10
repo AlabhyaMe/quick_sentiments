@@ -19,7 +19,7 @@ def run_pipeline(
     perform_tuning: bool = False,
     random_state: int = 42,
     param_grid: dict = None,
-    interactive: bool = True
+    interactive: bool = False
 ):
     """
     Orchestrates the full sentiment analysis pipeline: Vectorization -> Training -> Evaluation.
@@ -51,6 +51,9 @@ def run_pipeline(
         perform_tuning (bool, optional): 
             If True, performs Hyperparameter Tuning (GridSearch) to find the best model settings. 
             Warning: This can take a long time! Defaults to False.
+        interactive_mode (bool, optional): DEV MODE TOGGLE. If True, prompts the user before 
+            executing memory safety fallbacks. MUST be False in automated/cloud production 
+            environments to prevent server hanging. Defaults to False.
 
     Returns:
         dict: A dictionary containing:
@@ -121,6 +124,16 @@ def run_pipeline(
         "tensorflow": "tf_model",
         "keras": "tf_model"
     }
+
+    if interactive:
+        print("="*60)
+        print("[WARNING] INTERACTIVE MODE IS ENABLED")
+        print("Safety fallback prompts will pause execution if tuning fails.")
+        print("Do NOT leave this enabled in automated cloud or scheduled")
+        print("pipelines, as it may cause the server to hang indefinitely.")
+        print("="*60)
+    else:
+        print("   - Interactive mode disabled. Fail-fast safety engaged.")
 
     actual_vec_module = VEC_MAP.get(vectorizer_name.lower(), vectorizer_name)
     actual_model_module = MODEL_MAP.get(model_name.lower(), model_name)

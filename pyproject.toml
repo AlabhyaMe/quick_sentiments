@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quick-sentiments"
-version = "0.6.2" # manual hyperparameter enabled, value and memory error
+version = "0.6.4" # manual hyperparameter enabled, value and memory error
 authors = [
   { name="Alabhya Dahal", email="alabhya.dahal@gmail.com" },
 ]
