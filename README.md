@@ -1,7 +1,6 @@
 [![PyPI Version](https://img.shields.io/pypi/v/quick-sentiments)](https://pypi.org/project/quick-sentiments/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/quick-sentiments?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/quick-sentiments)
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" />
-[![PyPI - Monthly Downloads](https://img.shields.io/pypi/dm/your-package-name)](https://pypi.org/project/your-package-name/)
 [![Downloads](https://static.pepy.tech/badge/your-package-name/month)](https://pepy.tech/project/your-package-name)
 
 #  Quick Sentiments
