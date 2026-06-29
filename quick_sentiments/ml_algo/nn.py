@@ -3,6 +3,7 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+import scipy.sparse as sp
 import warnings
 import numpy as np 
 
@@ -13,12 +14,43 @@ def train_and_predict(
     perform_tuning=False, 
     param_grid=None,
     interactive_mode=False,
+    balance_classes=False,
     random_state=42
 ):
     """
     Trains a Multi-layer Perceptron (MLP) Classifier model (Neural Network)
     (with optional hyperparameter tuning) and predicts on test data.
     """
+    # --- NEW FEATURE: Class Balancing ---
+    if balance_classes:
+        print("   - Balancing classes via Random Oversampling (MLP does not natively support sample_weight)...")
+        classes, counts = np.unique(y_train, return_counts=True)
+        max_count = np.max(counts)
+        
+        X_resampled_list = []
+        y_resampled_list = []
+        
+        for c in classes:
+            c_indices = np.where(y_train == c)[0]
+            # Randomly sample with replacement to match the majority class count
+            resampled_indices = np.random.choice(c_indices, max_count, replace=True)
+            X_resampled_list.append(X_train[resampled_indices])
+            y_resampled_list.append(y_train[resampled_indices])
+            
+        # Safely combine data whether it's a sparse matrix (TF-IDF) or dense array (Word2Vec)
+        if sp.issparse(X_train):
+            X_train = sp.vstack(X_resampled_list)
+        else:
+            X_train = np.vstack(X_resampled_list)
+            
+        y_train = np.concatenate(y_resampled_list)
+        
+        # Shuffle the newly ordered data to prevent training bias
+        np.random.seed(random_state)
+        shuffle_idx = np.random.permutation(len(y_train))
+        X_train = X_train[shuffle_idx]
+        y_train = y_train[shuffle_idx]
+    
     # Base model for training, with a max_iter for convergence
     mlp_model = MLPClassifier(random_state=random_state, max_iter=1000)
 

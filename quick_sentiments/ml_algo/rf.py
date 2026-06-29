@@ -3,6 +3,7 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+from sklearn.utils.class_weight import compute_sample_weight
 import warnings
 import numpy as np
 
@@ -13,6 +14,7 @@ def train_and_predict(
     perform_tuning=False, 
     param_grid=None,
     interactive_mode=False,
+    balance_classes=False,
     random_state=42
 ):
     """
@@ -31,6 +33,14 @@ def train_and_predict(
         y_pred: predicted labels for test set.
         best_model: The best trained RandomForestClassifier model (either from GridSearchCV or simple fit).
     """
+    sample_weights = None
+    if balance_classes:
+        sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+        
+    # We create a kwargs dictionary to cleanly pass weights to the .fit() commands only if they exist
+    fit_params = {'sample_weight': sample_weights} if sample_weights is not None else {}
+    
+    
     # Base model for training
     rf_model = RandomForestClassifier(n_jobs=-1, random_state=random_state) 
 
@@ -63,7 +73,7 @@ def train_and_predict(
 
         # Check if grid parameters are valid before fitting
         try:
-            grid_search.fit(X_train, y_train)
+            grid_search.fit(X_train, y_train, **fit_params)
             best_model = grid_search.best_estimator_
             print("\n   - Best Hyperparameters found:")
         except ValueError as e:
@@ -85,7 +95,7 @@ def train_and_predict(
                             n_jobs=-1,
                             verbose=1
                         )
-                        grid_search.fit(X_train, y_train)
+                        grid_search.fit(X_train, y_train, **fit_params)
                         best_model = grid_search.best_estimator_
                     else:
                         print("   - Aborting execution.")
@@ -115,10 +125,15 @@ def train_and_predict(
                     
                     X_train_small = X_train[indices]
                     y_train_small = y_train[indices]
+
+                    fit_params_small = {}
+                    if 'sample_weight' in fit_params:
+                        fit_params_small['sample_weight'] = fit_params['sample_weight'][indices]
                     
                     # Abandon the grid search completely. Just fit the base model so the pipeline finishes.
                     best_model = rf_model
-                    best_model.fit(X_train_small, y_train_small)
+
+                    best_model.fit(X_train_small, y_train_small, **fit_params_small)
                     print("   - [SUCCESS] Subsample training complete.")
                 else:
                     print("   - Aborting execution.")
@@ -130,7 +145,7 @@ def train_and_predict(
     else:
         print("   - Training Random Forest with default parameters (no hyperparameter tuning)...")
         best_model = rf_model # Use the base model directly
-        best_model.fit(X_train, y_train) # Fit it on X_train, y_train
+        best_model.fit(X_train, y_train, **fit_params) # Fit it on X_train, y_train
         print("   - Model trained with default parameters.")
 
     # Make predictions on the test set using the best model (tuned or default)

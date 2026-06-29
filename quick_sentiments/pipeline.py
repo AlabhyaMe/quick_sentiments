@@ -19,7 +19,8 @@ def run_pipeline(
     perform_tuning: bool = False,
     random_state: int = 42,
     param_grid: dict = None,
-    interactive: bool = False
+    interactive: bool = False,
+    balance_classes: bool = False
 ):
     """
     Orchestrates the full sentiment analysis pipeline: Vectorization -> Training -> Evaluation.
@@ -212,7 +213,8 @@ def run_pipeline(
                                                               perform_tuning=perform_tuning,
                                                               random_state=random_state,
                                                               param_grid=param_grid,
-                                                              interactive_mode=interactive)
+                                                              interactive_mode=interactive,
+                                                              balance_classes=balance_classes)
     
 
     # Evaluate

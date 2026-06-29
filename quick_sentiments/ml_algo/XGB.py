@@ -1,9 +1,10 @@
 # ml_algo/XGB.py
 
 from xgboost import XGBClassifier
-from xgboost.core import XGBoostError  # <-- NEW: Import XGBoost's internal error class
+from xgboost.core import XGBoostError  
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+from sklearn.utils.class_weight import compute_sample_weight
 import numpy as np
 
 def train_and_predict(
@@ -13,11 +14,19 @@ def train_and_predict(
     perform_tuning=False, 
     param_grid=None,
     interactive_mode=False,
+    balance_classes=False,
     random_state=42
 ):
     """
     Trains XGBoostClassifier model (with optional hyperparameter tuning) and predicts on test data.
     """
+    sample_weights = None
+    if balance_classes:
+        sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+        
+    # We create a kwargs dictionary to cleanly pass weights to the .fit() commands only if they exist
+    fit_params = {'sample_weight': sample_weights} if sample_weights is not None else {}
+    
     print("   - Starting XGBoost training...")
 
     # Determine objective and eval_metric based on number of unique classes
@@ -73,7 +82,7 @@ def train_and_predict(
 
         # The Safety Net
         try:
-            grid_search.fit(X_train, y_train)
+            grid_search.fit(X_train, y_train, **fit_params)
             
             # --- FIXED: Save the winning model on success ---
             best_model = grid_search.best_estimator_
@@ -100,7 +109,7 @@ def train_and_predict(
                             n_jobs=-1,
                             verbose=1
                         )
-                        grid_search.fit(X_train, y_train)
+                        grid_search.fit(X_train, y_train, **fit_params)
                         
                         # --- FIXED: Save the fallback model ---
                         best_model = grid_search.best_estimator_
@@ -133,9 +142,13 @@ def train_and_predict(
                     X_train_small = X_train[indices]
                     y_train_small = y_train[indices]
                     
+                    fit_params_small = {}
+                    if 'sample_weight' in fit_params:
+                        fit_params_small['sample_weight'] = fit_params['sample_weight'][indices]
+                    
                     # Abandon grid search, fit the base model
                     best_model = xgb_model
-                    best_model.fit(X_train_small, y_train_small)
+                    best_model.fit(X_train_small, y_train_small, **fit_params_small)
                     print("   - [SUCCESS] Subsample training complete.")
                 else:
                     print("   - Aborting execution.")
@@ -147,7 +160,7 @@ def train_and_predict(
     else:
         print("   - Training XGBoost with default parameters (no hyperparameter tuning)...")
         best_model = xgb_model 
-        best_model.fit(X_train, y_train) 
+        best_model.fit(X_train, y_train, **fit_params) 
         print("   - Model trained with default parameters.")
 
     # Make predictions safely using whichever model survived

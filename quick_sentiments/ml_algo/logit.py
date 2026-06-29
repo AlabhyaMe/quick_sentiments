@@ -3,6 +3,7 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+from sklearn.utils.class_weight import compute_sample_weight
 import numpy as np
 
 def train_and_predict(X_train, 
@@ -11,10 +12,19 @@ def train_and_predict(X_train,
                       perform_tuning=False, 
                       param_grid=None,
                       interactive_mode=False,
+                      balance_classes=False,
                       random_state=42):
     """
     Trains Logistic Regression model (with optional hyperparameter tuning) and predicts on test data.
     """
+    #Weigths for imbalanced classes
+    sample_weights = None
+    if balance_classes:
+        sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+        
+    # We create a kwargs dictionary to cleanly pass weights to the .fit() commands only if they exist
+    fit_params = {'sample_weight': sample_weights} if sample_weights is not None else {}
+
     # Base model for training
     lr_model = LogisticRegression(random_state=random_state) 
     
@@ -48,7 +58,7 @@ def train_and_predict(X_train,
 
         # Check if grid parameters are valid (and fit in RAM) before proceeding
         try:
-            grid_search.fit(X_train, y_train)
+            grid_search.fit(X_train, y_train, **fit_params)
             
             # --- FIXED: Save the winning model on success ---
             best_model = grid_search.best_estimator_
@@ -75,7 +85,8 @@ def train_and_predict(X_train,
                             n_jobs=-1,
                             verbose=1
                         )
-                        grid_search.fit(X_train, y_train)
+                        grid_search.fit(X_train, y_train, **fit_params)
+                        
                         
                         # --- FIXED: Save the fallback model ---
                         best_model = grid_search.best_estimator_
@@ -108,10 +119,15 @@ def train_and_predict(X_train,
                     
                     X_train_small = X_train[indices]
                     y_train_small = y_train[indices]
+
+                    # Balance class for the subsample if requested
+                    fit_params_small = {}
+                    if 'sample_weight' in fit_params:
+                        fit_params_small['sample_weight'] = fit_params['sample_weight'][indices]
                     
                     # Abandon grid search, fit the base model
                     best_model = lr_model
-                    best_model.fit(X_train_small, y_train_small)
+                    best_model.fit(X_train_small, y_train_small, **fit_params_small)
                     print("   - [SUCCESS] Subsample training complete.")
                 else:
                     print("   - Aborting execution.")
@@ -123,7 +139,7 @@ def train_and_predict(X_train,
     else:
         print("   - Training Logistic Regression with default parameters (no hyperparameter tuning)...")
         best_model = lr_model 
-        best_model.fit(X_train, y_train) 
+        best_model.fit(X_train, y_train, **fit_params) 
         print("   - Model trained with default parameters.")
 
     # Make predictions safely using whichever model survived

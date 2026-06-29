@@ -1,7 +1,7 @@
 # ml_algo/tf_model.py
 
 import numpy as np
-from scipy.sparse import issparse
+import scipy.sparse as sp
 from sklearn.model_selection import GridSearchCV
 import warnings
 
@@ -39,15 +39,45 @@ def train_and_predict(
     perform_tuning=False, 
     param_grid=None,
     interactive_mode=False,
+    balance_classes=False,
     random_state=42
 ):
     """
     Trains a TensorFlow Neural Network seamlessly within the scikit-learn pipeline.
     """
     tf.random.set_seed(random_state)
+
+    if balance_classes:
+        print("   - Balancing classes via Random Oversampling for TensorFlow...")
+        classes, counts = np.unique(y_train, return_counts=True)
+        max_count = np.max(counts)
+        
+        X_resampled_list = []
+        y_resampled_list = []
+        
+        for c in classes:
+            c_indices = np.where(y_train == c)[0]
+            # Randomly sample with replacement to match the majority class count
+            resampled_indices = np.random.choice(c_indices, max_count, replace=True)
+            X_resampled_list.append(X_train[resampled_indices])
+            y_resampled_list.append(y_train[resampled_indices])
+            
+        # Safely combine data whether it's a sparse matrix or dense array
+        if sp.issparse(X_train):
+            X_train = sp.vstack(X_resampled_list)
+        else:
+            X_train = np.vstack(X_resampled_list)
+            
+        y_train = np.concatenate(y_resampled_list)
+        
+        # Shuffle the newly ordered data to prevent training bias
+        np.random.seed(random_state)
+        shuffle_idx = np.random.permutation(len(y_train))
+        X_train = X_train[shuffle_idx]
+        y_train = y_train[shuffle_idx]
     
     # Handle Sparse Data from Bag-of-Words / TF-IDF
-    if issparse(X_train):
+    if sp.issparse(X_train):
         print("   - Converting sparse text matrix to dense array for TensorFlow...")
         X_train = X_train.toarray()
         X_test = X_test.toarray()
